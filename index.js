@@ -5,8 +5,11 @@ import thunk from 'redux-thunk';
 
 const inc = 'increment';
 const dec = 'decrement'
-const init = 'init'
+// const init = 'init'
 const actionbyAmount = 'incrementBypayload'
+const getUserAcountFullfiled = 'Fullfiled'
+const getUserAcountPending = 'Pending'
+const getUserAcountRejected = 'Rejected'
 const store = createStore(combineReducers({
     amount:amoutReducer,
     bonus:bonusReducer,
@@ -22,7 +25,11 @@ switch (action.type) {
         break;
     case actionbyAmount: return {amount:state.amount+action.payload}
         break;
-    case init: return {amount: action.payload}
+    case getUserAcountFullfiled: return {amount: action.payload}
+        break;
+    case getUserAcountRejected: return {...state,error:action.error}
+        break;
+    case getUserAcountPending: return {amount: action.payload}
         break;
     default: return state
         break;
@@ -54,17 +61,31 @@ function decrement(){
 function incrementByPayload(pl){
     return {type:actionbyAmount,payload:pl}
 }
+function getUserAcotFullfiled(pl){
+    return {type:getUserAcountFullfiled,payload:pl}///
+}
+function getUserAcotRejected(error){
+    return {type:getUserAcountRejected,error:error}////  to handle thre function 
+}
+function getUserAcotPending(pl){
+    return {type:getUserAcountPending,payload:pl}////
+}
 
 // async api calling 
 function getUserAcount(id){
     return async(dispatch,getState)=>{
+    try {
         const {data} = await axios.get(`http://localhost:3000/account/${id}`)
-    dispatch ({type:init,payload:data.amount})
+    dispatch (getUserAcotFullfiled(data.amount))//here we use dispatch again because of redux-thunk to handle response from api 
        }
+       catch (error) {
+           dispatch (getUserAcotRejected(error.message))
+        } 
+    } 
 }
 setTimeout(() => {
     // store.dispatch(getUserAcount(1)) //dispatch the function for action type 
-    store.dispatch(incrementByPayload(200)) 
+    store.dispatch(getUserAcount(1)) 
 }, 1000);
 
 
