@@ -1,11 +1,13 @@
 import {createStore ,applyMiddleware} from 'redux';
 import logger from 'redux-logger';``
 import axios from 'axios';
+import thunk from 'redux-thunk';
+
 const inc = 'increment';
 const dec = 'decrement'
 const init = 'init'
 const actionbyAmount = 'incrementBypayload'
-const store = createStore(reducer,applyMiddleware(logger.default));
+const store = createStore(reducer,applyMiddleware(logger.default,thunk.default)); //thunk is used to hold the funtion to get the data with async awati funciotn 
 const previous = []
 
 function reducer(state={amount:1},action){
@@ -41,19 +43,15 @@ function incrementByPayload(pl){
 }
 
 // async api calling 
-async function getUser(){
-const {data} = await axios.get('http://localhost:3000/account/2').catch((err)=>console.log(err.message));
-console.log(data)
-}
-getUser()
-
-function initUser(pl){
-    return {type:init,payload:pl}
+async function getUser(dispatch,getState){
+    const {data} = await axios.get('http://localhost:3000/account/2')
+    dispatch ({type:init,payload:data.amount})
+    
 }
 
-setInterval(() => {
-    store.dispatch(initUser(100)) //dispatch the function for action type 
-}, 5000);
+setTimeout(() => {
+    store.dispatch(getUser) //dispatch the function for action type 
+}, 1000);
 
 
 
