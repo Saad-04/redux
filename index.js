@@ -25,11 +25,11 @@ switch (action.type) {
         break;
     case actionbyAmount: return {amount:state.amount+action.payload}
         break;
-    case getUserAcountFullfiled: return {amount: action.payload}
+    case getUserAcountFullfiled: return {amount: action.payload,pending:false}
         break;
-    case getUserAcountRejected: return {...state,error:action.error}
+    case getUserAcountRejected: return {...state,error:action.error,pending:false}
         break;
-    case getUserAcountPending: return {amount: action.payload}
+    case getUserAcountPending: return {pending:true}
         break;
     default: return state
         break;
@@ -58,34 +58,35 @@ function increment(){
 function decrement(){
     return {type:dec}
 }
-function incrementByPayload(pl){
-    return {type:actionbyAmount,payload:pl}
+function incrementByPayload(value){
+    return {type:actionbyAmount,payload:value}
 }
-function getUserAcotFullfiled(pl){
-    return {type:getUserAcountFullfiled,payload:pl}///
+function getUserAcotFullfiled(value){
+    return {type:getUserAcountFullfiled,payload:value}///
 }
 function getUserAcotRejected(error){
     return {type:getUserAcountRejected,error:error}////  to handle thre function 
 }
-function getUserAcotPending(pl){
-    return {type:getUserAcountPending,payload:pl}////
+function getUserAcotPending(){
+    return {type:getUserAcountPending}////
 }
 
 // async api calling 
 function getUserAcount(id){
     return async(dispatch,getState)=>{
     try {
+        dispatch(getUserAcotPending())
         const {data} = await axios.get(`http://localhost:3000/account/${id}`)
     dispatch (getUserAcotFullfiled(data.amount))//here we use dispatch again because of redux-thunk to handle response from api 
        }
        catch (error) {
            dispatch (getUserAcotRejected(error.message))
         } 
-    } 
+    }  
 }
 setTimeout(() => {
     // store.dispatch(getUserAcount(1)) //dispatch the function for action type 
-    store.dispatch(getUserAcount(1)) 
+    store.dispatch( getUserAcount(1)) 
 }, 1000);
 
 
